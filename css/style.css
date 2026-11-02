@@ -1,1 +1,7 @@
 /* Add any custom CSS stylings you want here */
+
+/* Give every GIF the same square tile so the grid lines up evenly */
+#gif-container img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
