@@ -3,16 +3,23 @@ console.log("script.js loaded");
 // Giphy API key (normally this would live in .env, but the course allows it here for now)
 const API_KEY = "pOPVojkSgw1YmH1WK7LUnjkm9mhm5LDu";
 
-// Giphy Search endpoint: 12 G-rated results for the search term
-const endpoint = `https://api.giphy.com/v1/gifs/search?api_key=${API_KEY}&q=funny&limit=12&offset=0&rating=g&lang=en`;
+// Used when the search box is left empty
+const DEFAULT_TERM = "funny";
 
 // DOM elements
 const gifContainer = document.querySelector("#gif-container");
 const fetchGifBtn = document.querySelector("#fetch-gif-btn");
+const searchInput = document.querySelector("#search-input");
+
+// Build the Giphy Search URL: 12 G-rated results for the search term
+function buildEndpoint(term) {
+  const endpoint = `https://api.giphy.com/v1/gifs/search?api_key=${API_KEY}&q=${encodeURIComponent(term)}&limit=12&offset=0&rating=g&lang=en`;
+  return endpoint;
+}
 
 // Request GIFs from Giphy and return the parsed JSON
-async function fetchGifs() {
-  const response = await fetch(endpoint);
+async function fetchGifs(term) {
+  const response = await fetch(buildEndpoint(term));
   const data = await response.json();
   return data;
 }
@@ -33,9 +40,20 @@ function renderGifs(images) {
   }
 }
 
-fetchGifBtn.addEventListener("click", async () => {
-  const data = await fetchGifs();
+// Search for whatever is in the input (or the default term) and show the results
+async function searchGifs() {
+  const term = searchInput.value.trim() || DEFAULT_TERM;
+  const data = await fetchGifs(term);
   const images = extractImageUrls(data);
   console.log(images);
   renderGifs(images);
+}
+
+fetchGifBtn.addEventListener("click", searchGifs);
+
+// Pressing Enter in the search box also runs a search
+searchInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    searchGifs();
+  }
 });
